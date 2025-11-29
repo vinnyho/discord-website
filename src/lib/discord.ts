@@ -1,7 +1,14 @@
 import { REST } from '@discordjs/rest'
 import { Routes } from 'discord-api-types/v10'
 
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN!)
+let restClient: REST | null = null
+
+function getRestClient() {
+  if (!restClient) {
+    restClient = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN!)
+  }
+  return restClient
+}
 
 export async function addUserToGuild(
   userId: string,
@@ -10,6 +17,7 @@ export async function addUserToGuild(
   roleId: string = process.env.DISCORD_ROLE_ID!
 ) {
   try {
+    const rest = getRestClient()
     // Add user to guild using their OAuth2 access token
     await rest.put(Routes.guildMember(guildId, userId), {
       body: {
@@ -37,6 +45,7 @@ export async function addRoleToUser(
   roleId: string = process.env.DISCORD_ROLE_ID!
 ) {
   try {
+    const rest = getRestClient()
     await rest.put(Routes.guildMemberRole(guildId, userId, roleId))
     return { success: true }
   } catch (error) {
@@ -51,6 +60,7 @@ export async function removeRoleFromUser(
   roleId: string = process.env.DISCORD_ROLE_ID!
 ) {
   try {
+    const rest = getRestClient()
     await rest.delete(Routes.guildMemberRole(guildId, userId, roleId))
     return { success: true }
   } catch (error) {
